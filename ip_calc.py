@@ -1,3 +1,8 @@
+"""
+Module for work with Internet addresses
+
+https://github.com/bmykhaylivvv/IPaddress
+"""
 import doctest
 
 from numbers import Number
@@ -10,11 +15,11 @@ def get_binary(number: Number) -> str:
     return bin(number)[2:].rjust(8, '0')
 
 
-def get_binary_ip(ip: str) -> str:
+def get_binary_ip(ip_address: str) -> str:
     """
     Function returns binary view of IP
     """
-    ip_lst = ip.split(".")
+    ip_lst = ip_address.split(".")
     binary_lst = [get_binary(int(num)) for num in ip_lst]
     return "".join(binary_lst)
 
@@ -52,19 +57,19 @@ def get_network_address_from_raw_address(raw_address: str) -> str:
     if valid_input_check(raw_address) != None:
         return valid_input_check(raw_address)
 
-    ip = get_ip_from_raw_address(raw_address)
+    ip_address = get_ip_from_raw_address(raw_address)
     mask = raw_address.split('/')[1]
 
-    binary_ip = get_binary_ip(ip)
+    binary_ip = get_binary_ip(ip_address)
 
     binary_mask = ""
     binary_mask = binary_mask.rjust(int(mask), '1').ljust(32, '0')
 
     network_address_binary = "".join(
         [str(int(c1) & int(c2)) for c1, c2 in zip(binary_ip, binary_mask)])
-
-    network_address_str = f'{int(network_address_binary[:8], 2)}.{int(network_address_binary[8:16], 2)}.{int(network_address_binary[16:24], 2)}.{int(network_address_binary[24:], 2)}'
-
+    network_address_str = ".".join([str(int(network_address_binary[:8], 2)),\
+         str(int(network_address_binary[8:16], 2)), str(int(network_address_binary[16:24], 2)),\
+              str(int(network_address_binary[24:32], 2))])
     return network_address_str
 
 
@@ -78,10 +83,10 @@ def get_broadcast_address_from_raw_address(raw_address: str) -> str:
     if valid_input_check(raw_address) != None:
         return valid_input_check(raw_address)
 
-    ip = get_ip_from_raw_address(raw_address)
+    ip_address = get_ip_from_raw_address(raw_address)
     mask = raw_address.split('/')[1]
 
-    binary_ip = get_binary_ip(ip)
+    binary_ip = get_binary_ip(ip_address)
 
     binary_mask = ""
     binary_mask = binary_mask.rjust(int(mask), '1').ljust(32, '0')
@@ -91,8 +96,9 @@ def get_broadcast_address_from_raw_address(raw_address: str) -> str:
 
     broadcast_address = "".join([str(int(c1) | int(c2))
                                  for c1, c2 in zip(binary_ip, reversed_mask)])
-
-    broadcast_address_str = f'{int(broadcast_address[:8], 2)}.{int(broadcast_address[8:16], 2)}.{int(broadcast_address[16:24], 2)}.{int(broadcast_address[24:], 2)}'
+    broadcast_address_str = ".".join([str(int(broadcast_address[:8], 2)),\
+         str(int(broadcast_address[8:16], 2)), str(int(broadcast_address[16:24], 2)),\
+              str(int(broadcast_address[24:32], 2))])
 
     return broadcast_address_str
 
@@ -111,9 +117,9 @@ def get_binary_mask_from_raw_address(raw_address: str) -> str:
     binary_mask = ""
     binary_mask = binary_mask.rjust(int(mask), '1').ljust(32, '0')
 
-    binary_mask_str = f'{binary_mask[:8]}.{binary_mask[8:16]}.{binary_mask[16:24]}.{binary_mask[24:]}'
+    bin_mask_str = f'{binary_mask[:8]}.{binary_mask[8:16]}.{binary_mask[16:24]}.{binary_mask[24:]}'
 
-    return binary_mask_str
+    return bin_mask_str
 
 
 def get_ip_class_from_raw_address(raw_address: str) -> str:
@@ -126,8 +132,8 @@ def get_ip_class_from_raw_address(raw_address: str) -> str:
     if valid_input_check(raw_address) != None:
         return valid_input_check(raw_address)
 
-    ip = get_ip_from_raw_address(raw_address)
-    ip_list = ip.split(".")
+    ip_address = get_ip_from_raw_address(raw_address)
+    ip_list = ip_address.split(".")
     ip_class = int(ip_list[0])
 
     if 0 <= ip_class <= 127:
@@ -188,8 +194,8 @@ def get_number_of_usable_hosts_from_raw_address(raw_address: str) -> Number:
     if valid_input_check(raw_address) != None:
         return valid_input_check(raw_address)
 
-    N = int(raw_address.split("/")[-1])
-    return pow(2, 32-N) - 2
+    numbr = int(raw_address.split("/")[-1])
+    return pow(2, 32 - numbr) - 2
 
 
 def check_private_ip_address_from_raw_address(raw_address: str) -> bool:
@@ -203,8 +209,9 @@ def check_private_ip_address_from_raw_address(raw_address: str) -> bool:
         return valid_input_check(raw_address)
 
     ip_main_part = raw_address.split("/")[0]
-    if int(ip_main_part[0]) == 10 or int(ip_main_part.split(".")[0]) == 192 and int(ip_main_part.split(".")[1]) == 168 or \
-            int(ip_main_part[0]) == 172 and (16 <= int(ip_main_part[1]) <= 32):
+    if int(ip_main_part[0]) == 10 or\
+        int(ip_main_part.split(".")[0]) == 192 and int(ip_main_part.split(".")[1]) == 168 or\
+        int(ip_main_part[0]) == 172 and (16 <= int(ip_main_part[1]) <= 32):
         return True
     return False
 
